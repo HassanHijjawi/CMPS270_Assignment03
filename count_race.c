@@ -66,7 +66,7 @@ int count1s ()
         pthread_create(&T[i],NULL,&threadCounting,(void*)i);
     }
 
-    for (int i=0;i<1;i++)
+    for (int i=0;i<ThreadsNumber;i++)
     {
         pthread_join(T[i],NULL);
     }
