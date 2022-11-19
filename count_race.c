@@ -9,6 +9,7 @@ int count=0;
 int correct_count=0;
 int ThreadsNumber=16;
 
+
 int count1s ()
  {
 
@@ -31,6 +32,11 @@ int count1s ()
     long numberofIterations = array_length / ThreadsNumber;
     long startIndex = ID*numberofIterations;
     long endIndex = startIndex+numberofIterations;
+
+    if(array_length-endIndex<numberofIterations)
+    {
+        endIndex=array_length;
+    }
 
     for(startIndex;startIndex<endIndex;startIndex++)
         {
