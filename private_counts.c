@@ -1,14 +1,44 @@
+/*
+    int count1s ()
+
+    Requires: Array containing integers
+    Effects: Returns the number of 1s in it.
+
+    This function was given in the assignment - Did not test it appropriately
+*/
+
+/*
+    void * threadCounting(void *id)
+
+    This function will be executed by each created thread.
+
+    Requires: The id of the thread. The id ranges from 0 to n-1 where n=number of threads.
+    Effects: Returns the number of ones the threads have counted.
+         PRECAUTIONS ARE TAKEN TO PREVENT RACE-CONDITIONS. THIS IS BY INITIALIZING FOR EACH THREAD A PRIVATE VARIABLE THAT IT MODIFIES.
+         CORRECT ANSWERS ARE EXPECTED
+
+    testcases:
+    Array sizes of 100,1000,10000,1000000,10000000,100000000,1000000000 with threads of sizes 1,2,4,8,16,32,64. 
+*/
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <time.h>
 
 long *array;
+
 long array_length = 10000000;
+// Global variable that the sequential function cont1s() will return its answer into
 int correct_count = 0;
+// The total number of threads
 int ThreadsNumber = 8;
+
 long *threads_independantResults;
 
+// Sequential Code - Given in the assignment
 int count1s()
 {
 
@@ -23,6 +53,7 @@ int count1s()
     return correct_count;
 }
 
+// this function will be executed by each thread
 void *threadCounting(void *id)
 {
     long ID = (long)id;
@@ -30,7 +61,10 @@ void *threadCounting(void *id)
     long startIndex = ID * numberofIterations;
     long endIndex = startIndex + numberofIterations;
 
+    // This is a private variable for each thread, to which each thread is modifying to find the number of 1s in their range
     int private_counter = 0;
+
+    // If this is the last thread, let it iterate till the end of the array
 
     if (array_length - endIndex < numberofIterations)
     {
@@ -43,6 +77,7 @@ void *threadCounting(void *id)
             private_counter++;
     }
 
+    // Store the number of 1s found by a thread in an array such that if thread is of id 2, we store at index 2.
     threads_independantResults[ID] = private_counter;
 }
 
@@ -50,9 +85,8 @@ int main()
 {
     int count = 0;
 
-    clock_t start_time, end_time;
-    start_time = clock();
-
+    clock_t start_time, check_time1,end_time;
+    
     array = (long *)malloc(array_length * sizeof(long));
     threads_independantResults = (long *)malloc(ThreadsNumber * sizeof(long));
 
@@ -61,7 +95,9 @@ int main()
         array[i] = rand() % 5 + 1;
     }
 
+    start_time = clock();
     correct_count = count1s();
+    check_time1 = clock();
     
 
     pthread_t T[ThreadsNumber];
@@ -84,10 +120,15 @@ int main()
         count += threads_independantResults[j];
     }
 
-    printf("# of Threads: %d\n", ThreadsNumber);
-    printf("Time Taken: %f\n", total_Time);
+    double total_Time_sequential = ((double) (check_time1-start_time)) / CLOCKS_PER_SEC;
+    double total_Time_parallel = ((double) (end_time-check_time1)) / CLOCKS_PER_SEC;
+
+    printf(" # Threads: %d\n",ThreadsNumber);
+    printf("Time Taken sequentially: %f\n",total_Time_sequential);
     printf("Correct count of 1's= %d\n", correct_count);
-    printf("Count of 1s with multiple threads: %d\n", count);
+    printf("Time Taken - parallel programming: %f\n",total_Time_parallel);
+    printf("Count of 1s with multiple threads: %d\n",count);
+
     free(array);
     free(threads_independantResults);
     return 0;
