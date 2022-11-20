@@ -31,13 +31,13 @@
 
 long * array;
 
-long array_length=10000000;
+long array_length=100;
 // Global variable to which all threads are writing into
 int count=0;
 // This will be the result the sequential function returns
 int correct_count=0;
 
-int ThreadsNumber=16;
+int ThreadsNumber=1;
 
 // Sequential Code - Given in the assignment
 int count1s ()
@@ -80,19 +80,23 @@ int count1s ()
  int main()
 {
     clock_t start_time,check_time1, end_time;
-    
+
     array = (long*)malloc(array_length * sizeof(long));
 
     for (long i=0;i<array_length;i++)
     {
         array[i] = rand() % 5 + 1;
     }
-    // Start time for sequential function
-    start_time=clock();
+
     correct_count = count1s();
-    //End time for sequential function and also start time of parallel programming
-    check_time1=clock();
-  
+    int correct_answer=0;
+
+    double timing [100] = {0};
+
+    for(int m=0;m<100;m++)
+    {
+
+    start_time=clock();  
     pthread_t T[ThreadsNumber];
 
     for(int i=0;i<ThreadsNumber;i++)
@@ -106,15 +110,26 @@ int count1s ()
     }
 
     end_time=clock();
-    double total_Time_sequential = ((double) (check_time1-start_time)) / CLOCKS_PER_SEC;
-    double total_Time_parallel = ((double) (end_time-check_time1)) / CLOCKS_PER_SEC;
+    double total_Time_parallel = ((double) (end_time-start_time)) / CLOCKS_PER_SEC;
+    timing[m] = total_Time_parallel;
+    if(count==correct_count)
+        correct_answer++;
+    
+    start_time=0;
+    end_time=0;
+    count=0;
+    
 
-   printf(" # Threads: %d\n",ThreadsNumber);
-   printf("Time Taken sequentially: %f\n",total_Time_sequential);
-   printf("Correct count of 1's= %d\n", correct_count);
-   printf("Time Taken - parallel programming: %f\n",total_Time_parallel);
-   printf("Count of 1s with multiple threads: %d\n",count);
-   free(array);
+    }
+    double averageTime=0;
+    for(int i=0;i<100;i++)
+    {
+        averageTime+=timing[i];
+    }
+    averageTime = averageTime/100.0;
+    
+   printf("Average Time: %f",averageTime);
+
 
     return 0;
 
